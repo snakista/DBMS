@@ -1,0 +1,141 @@
+create table seller(
+  sl_id char(2) primary key,
+  sl_name varchar(20),
+  rating float
+);
+create table category(
+  ct_id char(2) primary key,
+  category varchar(20)
+);
+create table product(
+  p_id char(2) primary key,
+  p_name varchar(50),
+  amount int,
+  qt_rem int,
+  ct_id char(2),
+  sl_id char(2),
+  rating float default 0.0,
+  foreign key (ct_id) references category(ct_id),
+  foreign key (sl_id) references seller(sl_id)
+);
+create table customer(
+  c_id int primary key,
+  c_name varchar(20),
+  password varchar(20)
+);
+create table orders(
+  order_id int primary key,
+  c_id int,
+  amount float,
+  dt date,
+  tm varchar(10)
+);
+create table order_products(
+  order_id int, 
+  p_id char(2), 
+  qt int,
+  sl_id char(2), 
+  amt float,
+  discount float,
+  rating float,
+  foreign key (order_id) references orders(order_id),
+  foreign key (p_id) references product(p_id),
+  foreign key (sl_id) references seller(sl_id)
+);
+insert into seller values('1S','Abhay',3.3);
+insert into seller values('2S','Priya',1.0);
+insert into seller values('3S','Kishan',4.8);
+insert into seller values('4S','Vicky',4.3);
+insert into seller values('5S','Sneha',3.6);
+insert into seller values('6S','Pushpa',2.8);
+
+insert into category values('1C','Books');
+insert into category values('2C','Footwear');
+insert into category values('3C','Home Decor');
+insert into category values('4C','Accessories');
+
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('1P','The programming language of oracle',350,4,'1C','1S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('2P','Nike White shoes',7000,2,'2C','3S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('3P','White Lamp',800,3,'3C','5S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('4P','Antique Silver Earrings',400,7,'4C','2S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('5P','Antique Silver Bracelet',700,5,'4C','6S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('6P','Catwalk leather flats',1599,3,'2C','4S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('7P','Introduction to Java',650,8,'1C','5S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('8P','Portico King size bedsheet',1999,1,'3C','1S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('9P','Book rack',999,7,'3C','4S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('10P','Artificial Intelligence, 3rd Edition',570,9,'1C','2S');
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('11P','Introduction to python',630,10,'1C','5S');
+
+insert into customer values(101,'Raj','a@b21');
+insert into customer values(102,'Aman','a@b22');
+insert into customer values(103,'Praveen','a@b23');
+insert into customer values(104,'Sunil','a@b24');
+insert into customer values(105,'Sudhir','a@b25');
+insert into customer values(106,'Sachin','a@b26');
+insert into customer values(107,'Sourav','a@b27');
+insert into customer values(108,'Mukesh','a@b28');
+
+insert into orders values(1,101,350,'2019-03-21','10:20am');
+insert into orders values(2,102,350,'2019-03-21','10:22am');
+insert into orders values(3,103,350,'2019-03-21','11:20am');
+insert into orders values(4,104,350,'2021-03-21','10:23am');
+insert into orders values(5,104,350,'2021-03-21','08:20am');
+insert into orders values(6,104,350,'2021-03-21','01:20am');
+insert into orders values(7,105,350,'2021-03-21','09:20am');
+insert into orders values(8,106,350,'2021-03-21','09:20am');
+insert into orders values(9,107,350,'2021-03-23','07:20am');
+insert into orders values(10,108,350,'2021-03-23','08:20am');
+
+insert into order_products values(1,'1P',1,'1S',350,10,3.5);
+insert into order_products values(2,'2P',2,'2S',350,10,2.5);
+insert into order_products values(3,'2P',1,'3S',349,10,4.0);
+insert into order_products values(4,'3P',3,'3S',350,10,3.6);
+insert into order_products values(5,'4P',1,'3S',351,10,3.0);
+insert into order_products values(6,'7P',2,'3S',352,10,4.5);
+insert into order_products values(7,'7P',1,'3S',353,10,4.0);
+insert into order_products values(8,'4P',2,'4S',350,10,4.7);
+insert into order_products values(9,'4P',1,'5S',350,10,2.8);
+insert into order_products values(10,'4P',1,'5S',350,10,3.8);
+
+select * from product,(select p_id,max(cnt) from (select p_id,count(p_id) as cnt from order_products group by p_id)) as t2 where t2.p_id=product.p_id;
+select char(13);
+update product set rating=(select rating from (select p_id,avg(rating) as rating from order_products group by p_id) as t2 where product.p_id=t2.p_id);
+
+insert into seller values('7S','Abhimanyu',3.7);
+
+insert into product(p_id,p_name,amount,qt_rem,ct_id,sl_id) values('12P','MacBook Pro',3000,5,'4C','6S');
+
+select * from product where p_id in (select p_id from product except select p_id from order_products);
+select char(13);
+
+select * from seller where sl_id not in (select sl_id from order_products as t1,(select order_id from orders where dt between datetime('now', '-1 days') AND datetime('now', 'localtime')) as t2
+where t1.order_id=t2.order_id);
+select char(13);
+
+select * from seller where sl_id=(select sl_id from(select sl_id,max(cnt) from (select sl_id,count(order_id) as cnt from order_products group by sl_id)));
+select char(13);
+
+select * from product where p_id=(select p_id from (select p_id,max(rating) from product));
+select char(13);
+
+select * from customer where c_id=(select c_id from 
+(select c_id,count(p_id) as cnt from (select * from orders where dt between datetime('now','-90 days') and datetime('now','localtime')) as t1,order_products as t2
+where t1.order_id=t2.order_id group by c_id) where cnt>1);
+select char(13);
+
+select * from seller where sl_id in (select sl_id from (select sl_id,max(cnt) from
+(select sl_id,count(t1.order_id) as cnt from (select * from orders where dt between datetime('now','-90 days') and datetime('now','localtime')) as t1,order_products as t2 
+where t1.order_id=t2.order_id group by sl_id
+except
+select sl_id,max(cnt) from /*removing maximum to get second highest*/
+(select sl_id,count(t1.order_id) as cnt from (select * from orders where dt between datetime('now','-90 days') and datetime('now','localtime')) as t1,order_products as t2 
+where t1.order_id=t2.order_id group by sl_id))));
+select char(13);
+
+select distinct p_name from (select p_id from order_products where sl_id in (select sl_id from (select sl_id,max(rating) from seller)) order by amt DESC) as t1,product as t2
+where t1.p_id=t2.p_id;
+select char(13);
+
+update seller set rating=(select rating from (select sl_id,avg(rating) as rating from order_products group by sl_id) as t2 where seller.sl_id=t2.sl_id);
+
+select p_name from product where qt_rem<=4;
